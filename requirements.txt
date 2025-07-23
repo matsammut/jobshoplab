@@ -1,0 +1,8 @@
+gymnasium
+torch
+heracless
+dash_ag_grid
+dash_daq
+pandas
+readchar
+rich
