@@ -850,6 +850,7 @@ class JobShopDashboard:
                 debug=self.debug,
                 use_reloader=False,
                 port=port,
+                host="0.0.0.0",
                 jupyter_height=1500,
                 jupyter_mode="inline",
             )
