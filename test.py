@@ -48,7 +48,7 @@ while not done:
     obs, reward, truncated, terminated, info = env.step(action)
 
     # Query the LLM about whether to punish the action
-    print("reward")
+    print(reward)
     # llm_judgment = should_penalize(obs, info, reward)
 
     # print(f"LLM says: {llm_judgment}")
