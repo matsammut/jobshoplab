@@ -26,10 +26,11 @@ You are an expert in job shop scheduling.
 Based on the following environment state:
 - Observation: {obs}
 - Info: {info}
+
+My algorithm gave the following reward ()
 - Reward: {reward}
 
-Should this action result in a large negative penalty (e.g., -100)? 
-Answer "yes" or "no" and briefly justify in 10 words.
+Evaluate
 """
     response = query_ollama(prompt)
     return response
@@ -47,12 +48,13 @@ while not done:
     obs, reward, truncated, terminated, info = env.step(action)
 
     # Query the LLM about whether to punish the action
-    llm_judgment = should_penalize(obs, info, reward)
+    print("reward")
+    # llm_judgment = should_penalize(obs, info, reward)
 
-    print(f"LLM says: {llm_judgment}")
+    # print(f"LLM says: {llm_judgment}")
 
-    if "yes" in llm_judgment.lower():
-        reward -= 100
+    # if "yes" in llm_judgment.lower():
+    #     reward -= 100
 
     done = truncated or terminated
 # Visualize the final schedule
