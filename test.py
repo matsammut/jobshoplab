@@ -56,10 +56,15 @@ while not done:
 
     # if "yes" in llm_judgment.lower():
     #     reward -= 100
-    llmreward = int(llm_judgment)
-    print("RL Reward:",reward)
-    print("LLM Reward:",llmreward)
-
+    # llmreward = int(llm_judgment)
+    match = re.search(r"\b\d+\.\d+\b", llmreward)
+    if match:
+        llmreward= float(match.group())
+        print("RL Reward:",reward)
+        print("LLM Reward:",llmreward)
+    else:
+        print("No float found.")
+    
     done = truncated or terminated
 # Visualize the final schedule
 env.render()
