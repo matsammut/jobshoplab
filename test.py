@@ -57,7 +57,7 @@ while not done:
     # if "yes" in llm_judgment.lower():
     #     reward -= 100
     # llmreward = int(llm_judgment)
-    match = re.search(r"\b\d+\.\d+\b", llmreward)
+    match = re.search(r"\b\d+\.\d+\b", llm_judgment)
     if match:
         llmreward= float(match.group())
         print("RL Reward:",reward)
