@@ -1,5 +1,5 @@
 from pathlib import Path
-
+import re
 import requests
 
 from jobshoplab import JobShopLabEnv, load_config
