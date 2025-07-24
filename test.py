@@ -27,10 +27,11 @@ Based on the following environment state:
 - Observation: {obs}
 - Info: {info}
 
-My algorithm gave the following reward ()
+My Reinforcement Learning algorithm gave the following reward (Min 0, Max 1.0)
 - Reward: {reward}
 
-Evaluate
+Evaluate the state and give me your score based on how good you think is the score. Give me a score between 0.0 and 1.0.
+Output your score only and nothing else.
 """
     response = query_ollama(prompt)
     return response
@@ -48,13 +49,16 @@ while not done:
     obs, reward, truncated, terminated, info = env.step(action)
 
     # Query the LLM about whether to punish the action
-    print(reward)
-    # llm_judgment = should_penalize(obs, info, reward)
+    
+    llm_judgment = should_penalize(obs, info, reward)
 
-    # print(f"LLM says: {llm_judgment}")
+    print(f"LLM says: {llm_judgment}")
 
     # if "yes" in llm_judgment.lower():
     #     reward -= 100
+    llmreward = int(llm_judgment)
+    print("RL Reward:",reward)
+    print("LLM Reward:",llmreward)
 
     done = truncated or terminated
 # Visualize the final schedule
