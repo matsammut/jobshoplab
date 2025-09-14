@@ -199,16 +199,104 @@ def summarize_results(results):
 
 
 
+# algorithms = {
+#     "STS": sts,
+#     "i-TSAB": i_tsab
+# }
+
+# results = run_experiment(
+#     instances_path="data/jssp_instances",
+#     algorithms=algorithms,
+#     trials=3,
+#     max_iter=500  # increase to ~5e7 for full-scale experiments
+# )
+
+# summarize_results(results)
+
+
+import numpy as np
+import pandas as pd
+
+# 1. Best known makespans for Taillard ta01–50
+# (source: Taillard 1993, also available at http://jobshop.jjvh.nl/)
+BEST_KNOWN = {
+    "ta01": 1231, "ta02": 1244, "ta03": 1218, "ta04": 1175, "ta05": 1224,
+    "ta06": 1238, "ta07": 1227, "ta08": 1217, "ta09": 1274, "ta10": 1241,
+    "ta11": 1357, "ta12": 1367, "ta13": 1342, "ta14": 1345, "ta15": 1339,
+    "ta16": 1360, "ta17": 1462, "ta18": 1396, "ta19": 1332, "ta20": 1348,
+    "ta21": 1642, "ta22": 1600, "ta23": 1557, "ta24": 1644, "ta25": 1595,
+    "ta26": 1645, "ta27": 1680, "ta28": 1603, "ta29": 1625, "ta30": 1584,
+    "ta31": 1764, "ta32": 1784, "ta33": 1791, "ta34": 1828, "ta35": 2007,
+    "ta36": 1819, "ta37": 1771, "ta38": 1673, "ta39": 1795, "ta40": 1670,
+    "ta41": 2006, "ta42": 1939, "ta43": 1846, "ta44": 1979, "ta45": 2000,
+    "ta46": 2006, "ta47": 1889, "ta48": 1937, "ta49": 1960, "ta50": 1923,
+}
+
+def compute_re(makespan, best_known):
+    return 100.0 * (makespan - best_known) / best_known
+
+def experiment_with_mre(instances_path, algorithms, trials=10, max_iter=50000):
+    results = defaultdict(lambda: defaultdict(list))
+
+    for fname in sorted(os.listdir(instances_path)):
+        if not fname.startswith("ta"):
+            continue
+        if int(fname[-2:]) > 50:
+            continue
+        if fname not in BEST_KNOWN:
+            continue
+
+        jobs, _, _ = parse_taillard(os.path.join(instances_path, fname))
+        best_known = BEST_KNOWN[fname]
+
+        for alg_name, alg in algorithms.items():
+            vals = []
+            for t in range(trials):
+                _, val = alg(jobs, max_iter=max_iter)
+                vals.append(val)
+            # store RE not absolute makespan
+            results[fname][alg_name] = [compute_re(v, best_known) for v in vals]
+            print(f"{fname} {alg_name} trial {t+1}: {val}")
+
+    return results
+
+def summarize_mre(results):
+    # group by instance ranges like ta01–10, ta11–20, ...
+    summary = []
+    groups = [(1,10),(11,20),(21,30),(31,40),(41,50)]
+    #groups = [(1,10),(11,20)]
+    for lo, hi in groups:
+        group_name = f"ta{lo:02d}–{hi:02d}"
+
+        row = {"Problem": group_name}
+        for alg in ["STS", "i-TSAB"]:
+            group_res = []
+            for i in range(lo, hi+1):
+                print(lo)
+                inst = f"ta{i:02d}"
+                print(inst)
+                if inst in results:
+                    group_res.extend(results[inst][alg])
+            bMRE = min(group_res)
+            mMRE = np.mean(group_res)
+            row[f"{alg}_bMRE"] = bMRE
+            row[f"{alg}_mMRE"] = mMRE
+        summary.append(row)
+    return pd.DataFrame(summary)
+
+
 algorithms = {
     "STS": sts,
     "i-TSAB": i_tsab
 }
 
-results = run_experiment(
+results = experiment_with_mre(
     instances_path="data/jssp_instances",
     algorithms=algorithms,
-    trials=3,
-    max_iter=500  # increase to ~5e7 for full-scale experiments
+    trials=10,
+    max_iter=50000000  # for testing; scale up later
 )
 
 summarize_results(results)
+df = summarize_mre(results)
+print(df.to_string(index=False))
